@@ -1,0 +1,439 @@
+import "../App.css";
+import { useFormik } from "formik";
+import reg from "../image/LoginPageImage1.svg";
+import reg1 from "../image/image2.svg";
+import reg2 from "../image/rArrow.svg";
+import reg3 from "../image/tIcon.svg";
+import recIcon from "../image/recEmailIcon.svg";
+import * as yup from "yup";
+import axios from "axios";
+import { useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import { Link, useNavigate } from "react-router-dom";
+function Cregister() {
+  let [submit, setSubmit] = useState(false);
+  const navigate = useNavigate();
+  let formik = useFormik({
+    initialValues: {
+      fullName: "",
+      organizationName: "",
+      email: "",
+      role: "",
+      password: "",
+      recoveryEmail: "",
+    },
+    validationSchema: yup.object({
+      email: yup
+        .string()
+        .email()
+        .required("email is required")
+        .strict(true)
+        .trim("no space is required for email"),
+      fullName: yup
+        .string()
+        .required("this field is required")
+        .min(3, "length of the name should be more than 3 letters")
+        .max(30, "length of the name should by less than 30 letters"),
+      organizationName: yup.string().required("this field is required"),
+      password: yup
+        .string()
+        .required("this field is required")
+        .min(8, "password should be more than 8 letters")
+        .max(15, "password should be less than 15 letters ")
+        .strict(true)
+        .trim("no space is required"),
+      role: yup.string().required("your role is required!"),
+      recoveryEmail: yup
+        .string()
+        .email()
+        .notOneOf(
+          [yup.ref("email"), null],
+          "recovery email should be differ from email"
+        )
+        .required("Email should be required"),
+    }),
+    onSubmit: (data) => {
+      setSubmit(true);
+      axios
+        .post(
+          process.env.REACT_APP_BACKEND_URL + "/register/organizationRegister",
+          data
+        )
+        .then((res) => {
+          toast.success(res.data);
+          setSubmit(false);
+          setstateValue(3)
+          // navigate("/");
+        })
+        .catch((err) => {
+          toast.error(err.response.data);
+          setSubmit(false);
+        });
+    },
+  });
+
+  const [stateValue, setstateValue] = useState(0);
+
+  const handleNextBtn = () => {
+    if (
+      formik.values.fullName === "" &&
+      formik.values.email === "" &&
+      formik.values.organizationName === "" &&
+      formik.values.password === ""
+    ) {
+      toast.error("All fields are required");
+      console.log(formik.values);
+    } else {
+      setstateValue(1);
+      console.log(formik.values);
+    }
+  };
+
+  const handleArrowBtn = () => {
+    if (formik.values.recoveryEmail === "") {
+      toast.error("Recovery email is required");
+      console.log(formik.values);
+    } else {
+      setstateValue(2);
+      console.log(formik.values);
+    }
+  };
+
+  return (
+    <div className=" w-full h-screen  sm:p-10">
+      <div className=" w-full h-full">
+        <div className=" w-full h-full flex bg-white lg:rounded-br-[30px]">
+          <div className=" w-fit h-full hidden lg:block">
+            <div class="text-green-400 text-[26px] pl-16 font-semibold font-['Montserrat']">
+              Lateform.
+            </div>
+            <img src={reg1} className=" w-full h-full " />
+          </div>
+
+          {stateValue === 0 && (
+            <div
+            className="overflow-auto grow flex flex-col  justify-center items-center  md:px-10 "
+            >
+              <div className=" flex flex-col justify-center items-center space-y-5">
+                <h1 className="text-center text-green-400 text-3xl font-semibold font-['Montserrat']">
+                  Welcome to LateForm.
+                </h1>
+                <div className="w-[142px] h-[5px] relative">
+                  <div class="w-[30px] h-[5px] left-0 top-0 absolute bg-green-400 rounded-[5px]"></div>
+                  <div class="w-[30px] h-[5px] left-[40px] top-0 absolute bg-slate-300 rounded-[5px]"></div>
+                  <div class="w-[30px] h-[5px] left-[76px] top-0 absolute bg-slate-300 rounded-[5px]"></div>
+                  <div class="w-[30px] h-[5px] left-[112px] top-0 absolute bg-slate-300 rounded-[5px]"></div>
+                </div>
+              </div>
+
+              <div className="  w-fit xl:w-[400px]  h-fit  py-4 px-8 mt-3 bg-slte-500 rounded-lg shadow">
+                <div className="flex flex-col space-y-8 justify-center items-center ">
+                  <div className="text-center text-black text-[18px] font-normal font-['Montserrat'] ">
+                    Fill the details to Sign Up for Hoster!
+                  </div>
+
+                  <div className=" w-full  ">
+                    <input
+                      type="text"
+                      placeholder="Full name"
+                      className=" w-full pl-2 h-12 bg-white rounded-[5px] border-2 "
+                      name="fullName"
+                      onChange={formik.handleChange}
+                      value={formik.values.fullName}
+                    />
+                    {formik.errors.fullName ? (
+                      <p className="text-danger">{formik.errors.fullName}</p>
+                    ) : null}
+                  </div>
+
+                  <div className=" w-full ">
+                    <input
+                      type="text"
+                      placeholder="Organization name*"
+                      className=" w-full pl-2 h-12 bg-white rounded-[5px] border-2 "
+                      name="organizationName"
+                      onChange={formik.handleChange}
+                      value={formik.values.organizationName}
+                    />
+                    {formik.errors.organizationName ? (
+                      <p className="text-danger">
+                        {formik.errors.organizationName}
+                      </p>
+                    ) : null}
+                  </div>
+
+                  <div className=" w-full  ">
+                    <input
+                      type="email"
+                      placeholder="Email*"
+                      className=" w-full pl-2 h-12 bg-white rounded-[5px] border-2 "
+                      name="email"
+                      onChange={formik.handleChange}
+                      value={formik.values.email}
+                    />
+                    {formik.errors.email ? (
+                      <p className="text-danger">{formik.errors.email}</p>
+                    ) : null}
+                  </div>
+
+                  <div className=" w-full  ">
+                    <input
+                      type="password"
+                      placeholder="Password*"
+                      className=" w-full pl-2 h-12 bg-white rounded-[5px] border-2 "
+                      name="password"
+                      onChange={formik.handleChange}
+                      value={formik.values.password}
+                    />
+                    {formik.errors.password ? (
+                      <p className="text-danger">{formik.errors.password}</p>
+                    ) : null}
+                  </div>
+
+                  {submit ? (
+                    <button
+                    className=" w-full  rounded-[5px] p-2 bg-green-400 hover:bg-green-500 text-white"
+                      disabled
+                    >
+                      registering...
+                      <div
+                        className="spinner-border text-success"
+                        role="status"
+                      >
+                        <span className="sr-only"></span>
+                      </div>
+                    </button>
+                  ) : (
+                    <button
+                    className=" w-full  rounded-[5px] p-2 bg-green-400 hover:bg-green-500 text-white"
+                      onClick={handleNextBtn}
+                    >
+                      <span className="text-green-400 text-base font-medium font-['Montserrat'] leading-7 ">
+                        Next
+                      </span>
+                    </button>
+                  )}
+
+                  <Link
+                    to="/organizerLogin"
+                    className="text-stone-500 text-xs font-medium font-['Montserrat'] leading-snug"
+                  >
+                    Already have a account?{" "}
+                    <span className="text-green-400 text-xs font-medium font-['Montserrat'] leading-snug">
+                      Login In
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {stateValue === 1 && (
+            <div
+              className=" w-fit h-full overflow-auto grow flex flex-col  justify-center items-center "
+            >
+              <div className=" flex flex-col justify-center items-center space-y-5">
+                <h1 className="text-center text-green-400 text-3xl font-semibold font-['Montserrat']">
+                  Welcome to LateForm.
+                </h1>
+                <div className="w-[142px] h-[5px] relative">
+                  <div className="w-[30px] h-[5px] left-0 top-0 absolute bg-lime-700 rounded-[5px]"></div>
+                  <div className="w-[30px] h-[5px] left-[40px] top-0 absolute bg-green-400 rounded-[5px]"></div>
+                  <div className="w-[30px] h-[5px] left-[76px] top-0 absolute bg-slate-300 rounded-[5px]"></div>
+                  <div className="w-[30px] h-[5px] left-[112px] top-0 absolute bg-slate-300 rounded-[5px]"></div>
+                </div>
+                <div className="text-center text-black text-[18px] font-normal font-['Montserrat'] ">
+                  Let us get to know you better!
+                </div>
+              </div>
+
+              <div className="  w-fit xl:w-[400px]  h-fit  py-4 px-8 mt-3 bg-slte-500 rounded-lg shadow">
+                <div class="w-[42px] h-[41px] mb-4 relative">
+                  <div class="w-[42px] h-[41px] left-0 top-0 absolute bg-stone-100 rounded-md shadow-md"></div>
+                  <div class="w-8 h-[30px] left-[5px] top-[6px] absolute">
+                    <img src={recIcon} alt="no img" />
+                  </div>
+                </div>
+                <div className="text-black text-base font-medium font-['Montserrat'] mb-4">
+                  Set your recovery number.{" "}
+                </div>
+                <div className="flex flex-col space-y-8 justify-center items-center ">
+                  <div className=" w-full  ">
+                    <input
+                      type="email"
+                      placeholder="recovery email"
+                      className=" w-full pl-2 h-12 bg-white rounded-[5px] border-2 "
+                      name="recoveryEmail"
+                      onChange={formik.handleChange}
+                      value={formik.values.recoveryEmail}
+                    />
+                    {formik.errors.recoveryEmail ? (
+                      <p className="text-danger">
+                        {formik.errors.recoveryEmail}
+                      </p>
+                    ) : null}
+                  </div>
+
+                  <button
+                    class="w-9 h-[35px] relative animate-pulse"
+                    onClick={handleArrowBtn}
+                  >
+                    <div class="w-9 h-[35px] left-0 top-0 absolute bg-stone-100 rounded-full"></div>
+                    <div class="w-[30px] h-[30px] left-[5px] top-[3px] absolute">
+                      <img src={reg2} alt="no img" />
+                    </div>
+                  </button>
+
+                  <Link
+                    to="/organizerLogin"
+                    className="text-stone-500 text-xs font-medium font-['Montserrat'] leading-snug"
+                  >
+                    Already have a account?{" "}
+                    <span className="text-green-400 text-xs font-medium font-['Montserrat'] leading-snug">
+                      {" "}
+                      login
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {stateValue === 2 && (
+            <form
+              className=" w-fit h-full overflow-auto grow flex flex-col  justify-center items-center "
+              onSubmit={formik.handleSubmit}
+            >
+              <div className=" flex flex-col justify-center items-center space-y-5">
+                <h1 className="text-center text-green-400 text-3xl font-semibold font-['Montserrat']">
+                  Welcome to LateForm.
+                </h1>
+                <div className="w-[142px] h-[5px] relative">
+                  <div className="w-[30px] h-[5px] left-0 top-0 absolute bg-lime-700 rounded-[5px]"></div>
+                  <div className="w-[30px] h-[5px] left-[40px] top-0 absolute bg-lime-700 rounded-[5px]"></div>
+                  <div className="w-[30px] h-[5px] left-[76px] top-0 absolute bg-green-400 rounded-[5px]"></div>
+                  <div className="w-[30px] h-[5px] left-[112px] top-0 absolute bg-slate-300 rounded-[5px]"></div>
+                </div>
+                <div className="text-center text-black text-[18px] font-normal font-['Montserrat'] ">
+                  Let us get to know you better!
+                </div>
+              </div>
+
+              <div className="  w-fit xl:w-[400px]  h-fit  py-4 px-8 mt-3 bg-slte-500 rounded-lg shadow">
+                <div className="flex flex-col space-y-8 justify-center items-center ">
+                  <div className=" w-full  ">
+                    <label className="flex items-center gap-x-1 text-[#434343]">
+                      Your role
+                    </label>
+                    <select
+                      className=" w-full pl-2 h-12 bg-white rounded-[5px] border-2 "
+                      onChange={formik.handleChange}
+                      value={formik.values.role}
+                      name="role"
+                      placeholder="Select your role"
+                    >
+                      <option disabled selected value="">
+                        Select your role
+                      </option>
+                      <option value="training admininstration">
+                        Training administration
+                      </option>
+                      <option value="management">Management</option>
+                      <option value="marketing">Marketing</option>
+                      <option value="sales">Sales</option>
+                      <option value="finance">Finance</option>
+                      <option value="it">IT</option>
+                      <option value="staff">Staff</option>
+                      <option value="other">Others</option>
+                    </select>
+                    {formik.errors.role ? (
+                      <p className="text-danger">{formik.errors.role}</p>
+                    ) : null}
+                  </div>
+
+                  {submit ? (
+                    <button
+                    className=" w-full  rounded-[5px] p-2 bg-green-400 hover:bg-green-500 text-white"
+                      disabled
+                    >
+                      registering...
+                      <div
+                        className="spinner-border text-success"
+                        role="status"
+                      >
+                        <span className="sr-only"></span>
+                      </div>
+                    </button>
+                  ) : (
+                    <button
+                    className=" w-full  rounded-[5px] p-2 bg-green-400 hover:bg-green-500 text-white"
+                    >
+                      <span className="text-white text-base font-bold font-['Montserrat'] leading-7 ">
+                        Submit
+                      </span>
+                    </button>
+                  )}
+
+                  <Link
+                    to="/organizerLogin"
+                    className="text-stone-500 text-xs font-medium font-['Montserrat'] leading-snug"
+                  >
+                    Already have a account?{" "}
+                    <span className="text-green-400 text-xs font-medium font-['Montserrat'] leading-snug">
+                      login
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            </form>
+          )}
+
+          {stateValue === 3 && (
+            <div
+              className=" w-fit h-full overflow-auto grow flex flex-col  justify-center items-center "
+            >
+              <div className=" flex flex-col justify-center items-center space-y-5 mb-4">
+                <h1 className="text-center text-green-400 text-3xl font-semibold font-['Montserrat']">
+                  Welcome to LateForm.
+                </h1>
+                <div class="w-[142px] h-[5px] relative">
+                  <div class="w-[30px] h-[5px] left-0 top-0 absolute bg-lime-700 rounded-[5px]"></div>
+                  <div class="w-[30px] h-[5px] left-[40px] top-0 absolute bg-lime-700 rounded-[5px]"></div>
+                  <div class="w-[30px] h-[5px] left-[76px] top-0 absolute bg-lime-700 rounded-[5px]"></div>
+                  <div class="w-[30px] h-[5px] left-[112px] top-0 absolute bg-green-400 rounded-[5px]"></div>
+                </div>
+              </div>
+
+              <div className="  w-fit xl:w-[400px]  h-fit  py-4 px-8 mt-3 bg-slte-500 rounded-lg shadow">
+                <div className="space-y-4">
+                  <div class="w-[42px] h-[41px] relative">
+                    <div class="w-[42px] h-[41px] left-0 top-0 absolute bg-zinc-100 rounded-md shadow-md"></div>
+                    <div class="w-6 h-6 left-[9px] top-[9px] absolute">
+                      <img src={reg3} alt="no img" />
+                    </div>
+                  </div>
+
+                  <div className="text-green-400 text-[28px] font-bold font-['Calibri'] tracking-wider">
+                    All done!
+                  </div>
+                  <div className="text-zinc-500 text-base font-normal font-['Arial']">
+                    Your account has been created. Would you like to login?
+                  </div>
+
+                  <button className=" w-full  rounded-[5px] p-2 bg-green-400 hover:bg-green-500" onClick={()=>navigate("/")}>
+                    <span className="text-base font-bold font-['Montserrat'] leading-7 text-white ">
+                      Login
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <ToastContainer />
+    </div>
+  );
+}
+export default Cregister;
